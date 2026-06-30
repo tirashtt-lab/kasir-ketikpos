@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ketikpos - Sistem Kasir</title>
+
+    <!-- PWA: agar web bisa di-install seperti aplikasi -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -4098,6 +4105,15 @@
         applyAccountToProfile();
         renderProducts();
         updateTotal();
+
+        // ===== Daftarkan Service Worker (agar web bisa di-install) =====
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch((err) => {
+                    console.log('Service worker gagal didaftarkan:', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
