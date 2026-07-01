@@ -1777,10 +1777,6 @@
 
                 <!-- Order Summary -->
                 <div class="order-summary">
-                    <div class="summary-row">
-                        <span>Diskon</span>
-                        <span class="summary-value" id="discount">Rp0</span>
-                    </div>
                     <div class="summary-row total">
                         <span>Total</span>
                         <span class="summary-value" id="total">Rp0</span>
@@ -3413,13 +3409,11 @@
             });
 
             const tax = subtotal * 0.1;
-            const discount = subtotal * 0.2;
-            const total = subtotal + tax - discount;
+            const total = subtotal + tax;
 
             currentSubtotal = subtotal;
             currentTax = tax;
 
-            document.getElementById('discount').textContent = formatIDR(discount);
             document.getElementById('total').textContent = formatIDR(total);
         }
 
@@ -3875,7 +3869,7 @@
 
             const subtotal = currentSubtotal;
             const tax = currentTax;
-            const discount = parseIDR(document.getElementById('discount').textContent);
+            const discount = 0;
             const total = parseIDR(document.getElementById('total').textContent);
             const profit = subtotal - subtotalCost; // keuntungan kotor dari selisih harga jual & harga modal
 
