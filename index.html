@@ -1337,6 +1337,19 @@
             grid-template-columns: repeat(4, 1fr);
         }
 
+        .pembukuan-stats.cols-5 {
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .stat-card.loss {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .stat-card.loss .stat-value {
+            color: #b91c1c;
+        }
+
         .stat-card.modal {
             background: #fff7ed;
             border-color: #fed7aa;
@@ -1822,6 +1835,9 @@
             .pembukuan-stats.cols-4 {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .pembukuan-stats.cols-5 {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -2096,7 +2112,7 @@
                     </div>
                 </div>
 
-                <div class="pembukuan-stats cols-4">
+                <div class="pembukuan-stats cols-5">
                     <div class="stat-card">
                         <div class="stat-icon">🧾</div>
                         <div class="stat-info">
@@ -2126,6 +2142,13 @@
                         <div class="stat-info">
                             <div class="stat-label">Total Keuntungan</div>
                             <div class="stat-value" id="statTotalKeuntungan">Rp0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card loss">
+                        <div class="stat-icon">📉</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Kerugian</div>
+                            <div class="stat-value" id="statTotalKerugian">Rp0</div>
                         </div>
                     </div>
                 </div>
@@ -4482,7 +4505,14 @@
             const discount = currentDiscount;
             const promoCode = currentPromoCode;
             const total = parseIDR(document.getElementById('total').textContent);
-            const profit = subtotal - subtotalCost; // keuntungan kotor dari selisih harga jual & harga modal
+
+            // Jika promo KETIKFMY (gratis 100%) dipakai, barang diberikan cuma-cuma:
+            // toko tidak menerima pendapatan sama sekali, sehingga ini adalah KERUGIAN
+            // sebesar harga modal barang, BUKAN keuntungan dari selisih harga jual & modal.
+            const isFreePromo = promoCode === 'KETIKFMY';
+            const profit = isFreePromo
+                ? -subtotalCost // dicatat negatif = kerugian, dipisahkan dari Total Keuntungan saat direkap
+                : subtotal - subtotalCost; // keuntungan kotor dari selisih harga jual & harga modal
 
             const { data: insertedTx, error: txError } = await supabaseClient
                 .from('transactions')
@@ -4675,6 +4705,11 @@
 
                     const methodClass = tx.paymentMethod === 'QRIS' ? 'qris' : 'tunai';
                     const methodLabel = tx.paymentMethod === 'QRIS' ? '📱 QRIS' : '💵 Tunai';
+                    const isLoss = tx.profit < 0;
+                    const profitCellStyle = isLoss ? ' style="color:#b91c1c;"' : '';
+                    const profitCellText = isLoss
+                        ? `-${formatIDR(Math.abs(tx.profit))} (Rugi)`
+                        : formatIDR(tx.profit);
                     return `
                         <tr>
                             <td>${tx.time.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</td>
@@ -4683,7 +4718,7 @@
                             <td><span class="badge-payment ${methodClass}">${methodLabel}</span></td>
                             <td>${formatIDR(tx.subtotal)}</td>
                             <td>${formatIDR(tx.total)}</td>
-                            <td class="profit-cell">${formatIDR(tx.profit)}</td>
+                            <td class="profit-cell"${profitCellStyle}>${profitCellText}</td>
                             <td>
                                 <div class="table-actions">
                                     <button class="delete-btn" onclick="deleteTransaction(${tx.id})">Hapus</button>
@@ -4698,13 +4733,17 @@
             const salesOnly = periodFiltered.filter(tx => tx.type !== 'restock');
             const totalTransaksi = salesOnly.length;
             const totalPendapatan = salesOnly.reduce((sum, tx) => sum + tx.total, 0);
-            const totalKeuntungan = salesOnly.reduce((sum, tx) => sum + tx.profit, 0);
+            // Keuntungan dan kerugian dihitung terpisah agar transaksi rugi (mis. promo KETIKFMY
+            // yang membuat barang dibayar gratis) tidak mengurangi/mencemari angka Total Keuntungan.
+            const totalKeuntungan = salesOnly.reduce((sum, tx) => sum + (tx.profit > 0 ? tx.profit : 0), 0);
+            const totalKerugian = salesOnly.reduce((sum, tx) => sum + (tx.profit < 0 ? Math.abs(tx.profit) : 0), 0);
 
             document.getElementById('statTotalTransaksi').textContent = totalTransaksi;
             document.getElementById('statTotalPendapatan').textContent = formatIDR(totalPendapatan);
             // Sisa Modal adalah saldo modal berjalan (bukan hasil filter periode), berkurang tiap ada Belanja Stok
             document.getElementById('statTotalModal').textContent = formatIDR(capitalBalance);
             document.getElementById('statTotalKeuntungan').textContent = formatIDR(totalKeuntungan);
+            document.getElementById('statTotalKerugian').textContent = formatIDR(totalKerugian);
         }
 
         async function deleteTransaction(id) {
