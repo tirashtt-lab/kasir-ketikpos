@@ -764,6 +764,82 @@
             font-weight: 600;
         }
 
+        .promo-code-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .promo-code-box input {
+            flex: 1;
+            padding: 9px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .promo-code-box input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .promo-apply-btn {
+            padding: 9px 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .promo-apply-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .promo-error {
+            font-size: 12px;
+            color: #ef4444;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .promo-applied-row {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .promo-applied-row .promo-info {
+            color: #15803d;
+            font-weight: 700;
+        }
+
+        .promo-applied-row .promo-amount {
+            color: #15803d;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .promo-remove-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
         /* Action Buttons */
         .action-buttons {
             display: flex;
@@ -1150,6 +1226,57 @@
             color: #1d4ed8;
         }
 
+        .badge-payment.restock {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        tr.row-restock td {
+            background: #f0fdf4;
+        }
+
+        tr.row-restock:hover td {
+            background: #dcfce7;
+        }
+
+        .restock-expense {
+            color: #c2410c;
+            font-weight: 700;
+        }
+
+        .stat-value-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-topup-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: none;
+            background: #c2410c;
+            color: white;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-topup-btn:hover {
+            background: #9a3412;
+        }
+
+        .restock-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: -4px;
+            margin-bottom: 10px;
+        }
+
         .period-filter-bar {
             display: flex;
             align-items: center;
@@ -1204,6 +1331,19 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 30px;
+        }
+
+        .pembukuan-stats.cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .stat-card.modal {
+            background: #fff7ed;
+            border-color: #fed7aa;
+        }
+
+        .stat-card.modal .stat-value {
+            color: #c2410c;
         }
 
         .stat-card {
@@ -1679,6 +1819,9 @@
             .category-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .pembukuan-stats.cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -1792,6 +1935,18 @@
 
                 <!-- Order Summary -->
                 <div class="order-summary">
+                    <div class="promo-code-box">
+                        <input type="text" id="promoCodeInput" placeholder="Kode Promo (opsional)" onkeydown="if(event.key==='Enter'){event.preventDefault(); applyPromoCode();}">
+                        <button type="button" class="promo-apply-btn" onclick="applyPromoCode()">Terapkan</button>
+                    </div>
+                    <div class="promo-error" id="promoError"></div>
+                    <div class="promo-applied-row" id="promoAppliedRow">
+                        <span class="promo-info" id="promoAppliedLabel">Kode aktif</span>
+                        <div>
+                            <span class="promo-amount" id="promoDiscountValue">-Rp0</span>
+                            <button type="button" class="promo-remove-btn" onclick="removePromoCode()">✕ Hapus</button>
+                        </div>
+                    </div>
                     <div class="summary-row total">
                         <span>Total</span>
                         <span class="summary-value" id="total">Rp0</span>
@@ -1858,6 +2013,7 @@
                 <div class="kelola-header">
                     <h2 style="font-size:18px; color:#1a1a1a;">Stok &amp; Harga Modal</h2>
                     <div style="display:flex; gap:10px;">
+                        <button class="btn-add-menu" style="background:#f0fdf4; color:#15803d; border:2px solid #86efac;" onclick="openRestockModal()">🛍️ Belanja Stok (Owner)</button>
                         <button class="btn-add-menu" style="background:#fff7ed; color:#b45309; border:2px solid #fdba74;" onclick="applyCategoryDefaultAddons('makanan')">🍔 Opsi Tambahan Makanan</button>
                         <button class="btn-add-menu" style="background:#eff6ff; color:#2563eb; border:2px solid #93c5fd;" onclick="applyCategoryDefaultAddons('minuman')">🥤 Opsi Tambahan Minuman</button>
                     </div>
@@ -1940,7 +2096,7 @@
                     </div>
                 </div>
 
-                <div class="pembukuan-stats">
+                <div class="pembukuan-stats cols-4">
                     <div class="stat-card">
                         <div class="stat-icon">🧾</div>
                         <div class="stat-info">
@@ -1953,6 +2109,16 @@
                         <div class="stat-info">
                             <div class="stat-label">Total Pendapatan</div>
                             <div class="stat-value" id="statTotalPendapatan">Rp0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card modal">
+                        <div class="stat-icon">🏦</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Sisa Modal</div>
+                            <div class="stat-value-row">
+                                <div class="stat-value" id="statTotalModal">Rp0</div>
+                                <button type="button" class="stat-topup-btn" title="Tambah Modal" onclick="openTopupModal()">➕</button>
+                            </div>
                         </div>
                     </div>
                     <div class="stat-card profit">
@@ -2163,6 +2329,50 @@
             </div>
         </div>
 
+        <!-- Modal Belanja Stok (Owner) -->
+        <div class="modal-overlay" id="restockModal">
+            <div class="modal-box" style="max-width: 460px;">
+                <h2>🛍️ Belanja Stok (Owner)</h2>
+                <p class="restock-hint">Catat pembelian stok oleh pemilik. Stok menu akan bertambah dan nominal yang dikeluarkan akan memotong Sisa Modal.</p>
+                <div id="restockDuplicateWarning" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:12px; font-weight:600; border-radius:8px; padding:10px 12px; margin-bottom:12px;"></div>
+                <div class="form-group">
+                    <label>Pilih Menu</label>
+                    <select id="restockItemSelect" onchange="updateRestockInfo()"></select>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Dibeli (pcs)</label>
+                    <input type="number" id="restockQty" step="1" min="1" placeholder="Contoh: 10">
+                </div>
+                <div class="form-group">
+                    <label>Total Uang Dikeluarkan (Rp)</label>
+                    <input type="number" id="restockAmount" step="500" min="0" placeholder="Contoh: 20000">
+                </div>
+                <p class="restock-hint" id="restockInfoText">Stok saat ini: - | Sisa Modal saat ini: -</p>
+                <div id="restockFormError" style="display:none; color:#ef4444; font-size:13px; margin-bottom:10px; font-weight:600;"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeRestockModal()">Batal</button>
+                    <button type="button" class="btn-save" style="background:#15803d;" onclick="submitRestock()">🛍️ Catat Belanja</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Tambah Modal -->
+        <div class="modal-overlay" id="topupModal">
+            <div class="modal-box" style="max-width: 400px;">
+                <h2>➕ Tambah Modal</h2>
+                <p class="restock-hint">Menambah saldo Sisa Modal (misalnya setoran awal atau tambahan modal dari pemilik).</p>
+                <div class="form-group">
+                    <label>Nominal Modal Ditambahkan (Rp)</label>
+                    <input type="number" id="topupAmount" step="500" min="0" placeholder="Contoh: 30000">
+                </div>
+                <div id="topupFormError" style="display:none; color:#ef4444; font-size:13px; margin-bottom:10px; font-weight:600;"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeTopupModal()">Batal</button>
+                    <button type="button" class="btn-save" style="background:#c2410c;" onclick="submitTopup()">Simpan</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal Pilih Nomor Meja -->
         <div class="modal-overlay" id="tableModal">
             <div class="modal-box" style="max-width: 480px;">
@@ -2314,8 +2524,38 @@
         };
 
         // ===== Pembukuan (synced with Supabase table 'transactions') =====
-        let transactions = []; // {id, time, items:[{name, price, qty}], subtotal, tax, discount, total, profit}
+        let transactions = []; // {id, time, items:[{name, price, qty}], subtotal, tax, discount, total, profit, type: 'penjualan' | 'restock'}
         let pembukuanPeriodMode = 'semua'; // 'semua' | 'harian' | 'bulanan'
+
+        // ===== Modal / Capital Balance (synced with Supabase table 'capital_balance') =====
+        let capitalBalance = 0;
+
+        async function loadCapitalBalance() {
+            const { data, error } = await supabaseClient
+                .from('capital_balance')
+                .select('*')
+                .eq('id', 1)
+                .maybeSingle();
+
+            if (error) {
+                showToast('Gagal memuat Sisa Modal: ' + error.message, 'error');
+                return;
+            }
+
+            capitalBalance = data ? Number(data.amount) : 0;
+        }
+
+        async function persistCapitalBalance(newAmount) {
+            const { error } = await supabaseClient
+                .from('capital_balance')
+                .upsert({ id: 1, amount: newAmount, updated_at: new Date().toISOString() });
+
+            if (error) {
+                return { success: false, error };
+            }
+            capitalBalance = newAmount;
+            return { success: true };
+        }
 
         async function loadTransactions() {
             const { data, error } = await supabaseClient
@@ -2340,13 +2580,15 @@
                 paymentMethod: row.payment_method,
                 cashReceived: row.cash_received !== null ? Number(row.cash_received) : null,
                 change: row.change !== null ? Number(row.change) : null,
-                tableNumber: row.table_number
+                tableNumber: row.table_number,
+                type: row.type || 'penjualan'
             }));
         }
 
         // ===== Nomor Meja (Table Orders) =====
         const TABLE_COUNT = 20;
         let tableOrders = {};   // { [nomorMeja]: innerHTML string keranjang meja tsb }
+        let tablePromoCodes = {}; // { [nomorMeja]: 'KETIKFMY' | 'KETIKTEAM' | null }
         let currentTable = null; // nomor meja yang sedang aktif di panel pesanan
 
         // ===== Printer Connection (REAL — Web Bluetooth / Web Serial API) =====
@@ -2472,7 +2714,7 @@
             passInput.value = '';
 
             showToast('Memuat data...', 'info');
-            await Promise.all([loadMenuItems(), loadTransactions()]);
+            await Promise.all([loadMenuItems(), loadTransactions(), loadCapitalBalance()]);
 
             const kasirIcon = document.querySelector('.sidebar-icon[title="Kasir"]');
             switchView('kasir', kasirIcon);
@@ -3063,6 +3305,193 @@
             renderInfoStokTable();
         }
 
+        // ===== Modal: Belanja Stok (Owner) =====
+        function openRestockModal() {
+            const select = document.getElementById('restockItemSelect');
+            const sortedItems = [...menuItems].sort((a, b) => a.name.localeCompare(b.name));
+            select.innerHTML = sortedItems
+                .map(m => `<option value="${m.id}">${m.emoji || ''} ${m.name} (Stok: ${m.stock || 0})</option>`)
+                .join('');
+
+            // Deteksi & peringatkan jika ada nama menu duplikat, supaya owner tidak salah pilih baris
+            const nameCounts = {};
+            menuItems.forEach(m => {
+                const key = m.name.trim().toLowerCase();
+                nameCounts[key] = (nameCounts[key] || 0) + 1;
+            });
+            const duplicateNames = Object.keys(nameCounts).filter(k => nameCounts[k] > 1);
+            const warningEl = document.getElementById('restockDuplicateWarning');
+            if (duplicateNames.length > 0) {
+                const examples = menuItems
+                    .filter(m => duplicateNames.includes(m.name.trim().toLowerCase()))
+                    .map(m => `${m.name} (Stok: ${m.stock || 0})`)
+                    .join(', ');
+                warningEl.textContent = `⚠️ Ditemukan menu dengan nama sama lebih dari satu: ${examples}. Cek dulu di Kelola Menu & hapus yang duplikat sebelum belanja stok, supaya tidak salah pilih baris.`;
+                warningEl.style.display = 'block';
+            } else {
+                warningEl.style.display = 'none';
+            }
+
+            document.getElementById('restockQty').value = '';
+            document.getElementById('restockAmount').value = '';
+            document.getElementById('restockFormError').style.display = 'none';
+            updateRestockInfo();
+            document.getElementById('restockModal').classList.add('show');
+        }
+
+        function closeRestockModal() {
+            document.getElementById('restockModal').classList.remove('show');
+        }
+
+        function updateRestockInfo() {
+            const select = document.getElementById('restockItemSelect');
+            const item = menuItems.find(m => String(m.id) === select.value);
+            const stockNow = item ? (item.stock || 0) : 0;
+            document.getElementById('restockInfoText').textContent =
+                `Stok saat ini: ${stockNow} | Sisa Modal saat ini: ${formatIDR(capitalBalance)}`;
+        }
+
+        async function submitRestock() {
+            const errorBox = document.getElementById('restockFormError');
+            const select = document.getElementById('restockItemSelect');
+            const itemId = select.value;
+            const qty = parseInt(document.getElementById('restockQty').value);
+            const amount = parseFloat(document.getElementById('restockAmount').value);
+
+            const item = menuItems.find(m => String(m.id) === String(itemId));
+
+            if (!item) {
+                errorBox.textContent = 'Menu tidak ditemukan. Silakan pilih menu terlebih dahulu.';
+                errorBox.style.display = 'block';
+                return;
+            }
+            if (isNaN(qty) || qty <= 0) {
+                errorBox.textContent = 'Mohon isi Jumlah Dibeli dengan angka yang valid (lebih dari 0).';
+                errorBox.style.display = 'block';
+                return;
+            }
+            if (isNaN(amount) || amount < 0) {
+                errorBox.textContent = 'Mohon isi Total Uang Dikeluarkan dengan angka yang valid.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            const newStock = (item.stock || 0) + qty;
+
+            // Update stok menu di database
+            const { error: stockError } = await supabaseClient
+                .from('menu_items')
+                .update({ stock: newStock })
+                .eq('id', item.id);
+
+            if (stockError) {
+                errorBox.textContent = 'Gagal update stok ke database: ' + stockError.message;
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            // Potong Sisa Modal sebesar nominal yang dikeluarkan
+            const newBalance = capitalBalance - amount;
+            const balanceResult = await persistCapitalBalance(newBalance);
+            if (!balanceResult.success) {
+                errorBox.textContent = 'Stok sudah diperbarui, tapi gagal memotong Sisa Modal: ' + (balanceResult.error ? balanceResult.error.message : 'kesalahan tidak diketahui') + '. Cek apakah tabel "capital_balance" sudah dibuat dan RLS-nya mengizinkan insert/update.';
+                errorBox.style.display = 'block';
+            }
+
+            // Catat sebagai baris hijau "Belanja Stok" di Pembukuan
+            const { data: insertedTx, error: txError } = await supabaseClient
+                .from('transactions')
+                .insert({
+                    items: [{ name: item.name, qty, price: amount, addons: '' }],
+                    subtotal: 0,
+                    tax: 0,
+                    discount: 0,
+                    total: amount,
+                    profit: 0,
+                    payment_method: 'Modal Owner',
+                    cash_received: null,
+                    change: null,
+                    table_number: null,
+                    type: 'restock'
+                })
+                .select()
+                .single();
+
+            if (txError) {
+                showToast('Belanja stok tersimpan sebagian, tapi gagal dicatat di Pembukuan: ' + txError.message, 'error');
+            } else {
+                transactions.unshift({
+                    id: insertedTx.id,
+                    time: new Date(insertedTx.time),
+                    items: [{ name: item.name, qty, price: amount, addons: '' }],
+                    subtotal: 0,
+                    tax: 0,
+                    discount: 0,
+                    total: amount,
+                    profit: 0,
+                    paymentMethod: 'Modal Owner',
+                    cashReceived: null,
+                    change: null,
+                    tableNumber: null,
+                    type: 'restock'
+                });
+            }
+
+            item.stock = newStock;
+
+            renderStokTable();
+            renderInfoStokTable();
+            renderProducts();
+            if (document.getElementById('pembukuanView').style.display !== 'none') {
+                renderPembukuanTable();
+            }
+
+            closeRestockModal();
+            showToast(`Belanja stok tercatat: ${item.name} +${qty} pcs. Stok jadi ${newStock}, Sisa Modal ${formatIDR(newBalance)}.`, 'success');
+        }
+
+        // ===== Modal: Tambah Modal (Top Up) =====
+        function openTopupModal() {
+            document.getElementById('topupAmount').value = '';
+            document.getElementById('topupFormError').style.display = 'none';
+            document.getElementById('topupModal').classList.add('show');
+        }
+
+        function closeTopupModal() {
+            document.getElementById('topupModal').classList.remove('show');
+        }
+
+        async function submitTopup() {
+            const errorBox = document.getElementById('topupFormError');
+            const amount = parseFloat(document.getElementById('topupAmount').value);
+
+            if (isNaN(amount) || amount <= 0) {
+                errorBox.textContent = 'Mohon isi nominal dengan angka yang valid (lebih dari 0).';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            const newBalance = capitalBalance + amount;
+            const result = await persistCapitalBalance(newBalance);
+            if (!result.success) {
+                errorBox.textContent = 'Gagal menyimpan penambahan modal: ' + (result.error ? result.error.message : 'kesalahan tidak diketahui') + '. Cek apakah tabel "capital_balance" sudah dibuat dan RLS-nya mengizinkan insert/update.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            document.getElementById('statTotalModal').textContent = formatIDR(capitalBalance);
+            closeTopupModal();
+            showToast(`Modal ditambahkan: ${formatIDR(amount)}. Sisa Modal sekarang ${formatIDR(capitalBalance)}.`, 'success');
+        }
+
+        // Close restock/topup modals when clicking outside the box
+        document.getElementById('restockModal').addEventListener('click', function (e) {
+            if (e.target === this) closeRestockModal();
+        });
+        document.getElementById('topupModal').addEventListener('click', function (e) {
+            if (e.target === this) closeTopupModal();
+        });
+
 
         // ===== Modal: Open / Close Menu =====
         function openMenuModal(id = null) {
@@ -3107,6 +3536,17 @@
 
             if (!name || priceRaw === '' || isNaN(price) || price < 0) {
                 errorBox.textContent = 'Mohon lengkapi Nama Menu dan Harga dengan benar.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            // Cegah nama menu duplikat (case-insensitive) agar stok tidak pernah terpecah ke 2 baris berbeda
+            const nameLower = name.toLowerCase();
+            const duplicate = menuItems.find(m =>
+                m.name.trim().toLowerCase() === nameLower && m.id !== editingMenuId
+            );
+            if (duplicate) {
+                errorBox.textContent = `Menu dengan nama "${duplicate.name}" sudah ada (Stok: ${duplicate.stock || 0}). Gunakan tombol Edit pada menu tersebut untuk mengubah stok, jangan buat menu baru dengan nama yang sama.`;
                 errorBox.style.display = 'block';
                 return;
             }
@@ -3242,10 +3682,14 @@
             // Simpan pesanan meja yang sedang aktif sebelum pindah
             if (currentTable !== null) {
                 tableOrders[currentTable] = orderItemsEl.innerHTML;
+                tablePromoCodes[currentTable] = currentPromoCode;
             }
 
             currentTable = num;
             orderItemsEl.innerHTML = tableOrders[num] || '';
+            currentPromoCode = tablePromoCodes[num] || null;
+            document.getElementById('promoCodeInput').value = '';
+            document.getElementById('promoError').style.display = 'none';
             updateTotal();
             updateTableSelectorUI();
             closeTableModal();
@@ -3417,22 +3861,99 @@
         // Update Total
         let currentSubtotal = 0;
         let currentTax = 0;
+        let currentDiscount = 0;
+
+        // ===== Kode Promo =====
+        // Hanya 2 kode promo yang berlaku, tidak ada kode lain yang diterima.
+        const PROMO_CODES = {
+            'KETIKFMY': { label: 'Gratis 100%', type: 'free' },
+            'KETIKTEAM': { label: 'Diskon 10% (Makanan)', type: 'percent_makanan', percent: 10 }
+        };
+
+        let currentPromoCode = null; // 'KETIKFMY' | 'KETIKTEAM' | null
 
         function updateTotal() {
             let subtotal = 0;
+            let makananSubtotal = 0;
+
             document.querySelectorAll('.order-item').forEach(item => {
+                const name = item.querySelector('.order-item-name').textContent;
                 const price = parseIDR(item.querySelector('.order-item-price').textContent);
                 const qty = parseInt(item.querySelector('.qty-display').textContent);
-                subtotal += price * qty;
+                const lineTotal = price * qty;
+                subtotal += lineTotal;
+
+                const menuItem = menuItems.find(m => m.name === name);
+                if (menuItem && menuItem.category === 'makanan') {
+                    makananSubtotal += lineTotal;
+                }
             });
 
             const tax = 0;
-            const total = subtotal + tax;
+
+            let discount = 0;
+            const promo = currentPromoCode ? PROMO_CODES[currentPromoCode] : null;
+            if (promo) {
+                if (promo.type === 'free') {
+                    discount = subtotal;
+                } else if (promo.type === 'percent_makanan') {
+                    discount = makananSubtotal * (promo.percent / 100);
+                }
+            }
+
+            const total = Math.max(0, subtotal + tax - discount);
 
             currentSubtotal = subtotal;
             currentTax = tax;
+            currentDiscount = discount;
 
             document.getElementById('total').textContent = formatIDR(total);
+            updatePromoDisplay();
+        }
+
+        function updatePromoDisplay() {
+            const row = document.getElementById('promoAppliedRow');
+            const promo = currentPromoCode ? PROMO_CODES[currentPromoCode] : null;
+            if (promo) {
+                row.style.display = 'flex';
+                document.getElementById('promoAppliedLabel').textContent = `${currentPromoCode} — ${promo.label}`;
+                document.getElementById('promoDiscountValue').textContent = '-' + formatIDR(currentDiscount);
+            } else {
+                row.style.display = 'none';
+            }
+        }
+
+        function applyPromoCode() {
+            const input = document.getElementById('promoCodeInput');
+            const code = input.value.trim().toUpperCase();
+            const errorEl = document.getElementById('promoError');
+            errorEl.style.display = 'none';
+
+            if (!code) {
+                errorEl.textContent = 'Masukkan kode promo terlebih dahulu.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (!PROMO_CODES[code]) {
+                errorEl.textContent = 'Kode promo tidak valid.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            currentPromoCode = code;
+            if (currentTable !== null) tablePromoCodes[currentTable] = code;
+            input.value = '';
+            updateTotal();
+            showToast(`Kode promo ${code} diterapkan ✅`, 'success');
+        }
+
+        function removePromoCode() {
+            currentPromoCode = null;
+            if (currentTable !== null) tablePromoCodes[currentTable] = null;
+            document.getElementById('promoCodeInput').value = '';
+            document.getElementById('promoError').style.display = 'none';
+            updateTotal();
         }
 
         // ===== Printer Modal =====
@@ -3958,7 +4479,8 @@
 
             const subtotal = currentSubtotal;
             const tax = currentTax;
-            const discount = 0;
+            const discount = currentDiscount;
+            const promoCode = currentPromoCode;
             const total = parseIDR(document.getElementById('total').textContent);
             const profit = subtotal - subtotalCost; // keuntungan kotor dari selisih harga jual & harga modal
 
@@ -3974,7 +4496,8 @@
                     payment_method: method,
                     cash_received: paymentDetails.cashReceived || null,
                     change: paymentDetails.change || null,
-                    table_number: currentTable
+                    table_number: currentTable,
+                    type: 'penjualan'
                 })
                 .select()
                 .single();
@@ -3996,7 +4519,8 @@
                 paymentMethod: method,
                 cashReceived: paymentDetails.cashReceived || null,
                 change: paymentDetails.change || null,
-                tableNumber: currentTable
+                tableNumber: currentTable,
+                type: 'penjualan'
             });
 
             // Kurangi stok menu sesuai jumlah yang terjual (local + database)
@@ -4019,7 +4543,11 @@
             document.getElementById('orderItems').innerHTML = '';
             if (currentTable !== null) {
                 tableOrders[currentTable] = '';
+                tablePromoCodes[currentTable] = null;
             }
+            currentPromoCode = null;
+            document.getElementById('promoCodeInput').value = '';
+            document.getElementById('promoError').style.display = 'none';
             updateTotal();
             closePaymentModal();
             renderProducts(); // refresh badge stok Kasir & tabel Info Stok
@@ -4125,6 +4653,26 @@
             } else {
                 tbody.innerHTML = filtered.map(tx => {
                     const itemsLabel = tx.items.map(i => `${i.name} x${i.qty}`).join(', ');
+
+                    if (tx.type === 'restock') {
+                        // Baris hijau: belanja stok oleh pemilik/owner
+                        return `
+                            <tr class="row-restock">
+                                <td>${tx.time.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</td>
+                                <td>🛍️ Belanja Stok</td>
+                                <td class="transaction-items-cell">${itemsLabel}</td>
+                                <td><span class="badge-payment restock">🏦 Modal Owner</span></td>
+                                <td>-</td>
+                                <td class="restock-expense">-${formatIDR(tx.total)}</td>
+                                <td>-</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="delete-btn" onclick="deleteTransaction(${tx.id})">Hapus</button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                    }
+
                     const methodClass = tx.paymentMethod === 'QRIS' ? 'qris' : 'tunai';
                     const methodLabel = tx.paymentMethod === 'QRIS' ? '📱 QRIS' : '💵 Tunai';
                     return `
@@ -4146,22 +4694,35 @@
             }
 
             // Update ringkasan (stat cards) berdasarkan periode yang dipilih (Semua/Harian/Bulanan), tidak terpengaruh pencarian teks
-            const totalTransaksi = periodFiltered.length;
-            const totalPendapatan = periodFiltered.reduce((sum, tx) => sum + tx.total, 0);
-            const totalKeuntungan = periodFiltered.reduce((sum, tx) => sum + tx.profit, 0);
+            // Statistik penjualan (Total Transaksi/Pendapatan/Keuntungan) hanya dihitung dari transaksi penjualan, bukan belanja stok owner
+            const salesOnly = periodFiltered.filter(tx => tx.type !== 'restock');
+            const totalTransaksi = salesOnly.length;
+            const totalPendapatan = salesOnly.reduce((sum, tx) => sum + tx.total, 0);
+            const totalKeuntungan = salesOnly.reduce((sum, tx) => sum + tx.profit, 0);
 
             document.getElementById('statTotalTransaksi').textContent = totalTransaksi;
             document.getElementById('statTotalPendapatan').textContent = formatIDR(totalPendapatan);
+            // Sisa Modal adalah saldo modal berjalan (bukan hasil filter periode), berkurang tiap ada Belanja Stok
+            document.getElementById('statTotalModal').textContent = formatIDR(capitalBalance);
             document.getElementById('statTotalKeuntungan').textContent = formatIDR(totalKeuntungan);
         }
 
         async function deleteTransaction(id) {
-            if (!confirm('Yakin ingin menghapus catatan transaksi ini?')) return;
+            const tx = transactions.find(t => t.id === id);
+            const isRestock = tx && tx.type === 'restock';
+            const confirmMsg = isRestock
+                ? 'Yakin ingin menghapus catatan Belanja Stok ini? Sisa Modal akan dikembalikan sebesar nominal transaksi ini (stok menu tidak otomatis dikurangi lagi).'
+                : 'Yakin ingin menghapus catatan transaksi ini?';
+            if (!confirm(confirmMsg)) return;
 
             const { error } = await supabaseClient.from('transactions').delete().eq('id', id);
             if (error) {
                 showToast('Gagal menghapus dari database: ' + error.message, 'error');
                 return;
+            }
+
+            if (isRestock) {
+                await persistCapitalBalance(capitalBalance + tx.total);
             }
 
             transactions = transactions.filter(tx => tx.id !== id);
