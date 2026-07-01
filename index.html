@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -1101,12 +1102,12 @@
             background: #f9f9f9;
             border: 2px dashed #cbd5e1;
             border-radius: 16px;
-            padding: 30px 20px;
+            padding: 24px 20px;
         }
 
         .qris-pattern {
-            width: 140px;
-            height: 140px;
+            width: 200px;
+            height: 200px;
             margin: 0 auto;
             background: white;
             border: 2px solid #e0e0e0;
@@ -1115,6 +1116,20 @@
             align-items: center;
             justify-content: center;
             font-size: 64px;
+            padding: 8px;
+        }
+
+        .qris-pattern img {
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+
+        .qris-merchant-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-top: 12px;
         }
 
         .badge-payment {
@@ -2192,11 +2207,14 @@
                 <!-- Panel QRIS -->
                 <div id="panelQris" style="display:none; text-align:center;">
                     <div class="qris-box">
-                        <div class="qris-pattern">📱</div>
-                        <p style="font-size:13px; color:#666; margin-top:10px;">Pindai kode QRIS untuk membayar</p>
+                        <div class="qris-pattern" id="qrisPattern">
+                            <span id="qrisLoadingLabel">⏳</span>
+                        </div>
+                        <div class="qris-merchant-name">KETIK (KEDAI TIKUNGAN)</div>
+                        <p style="font-size:13px; color:#666; margin-top:8px;">Pindai kode QRIS untuk membayar</p>
                         <p style="font-size:18px; font-weight:700; color:#1a1a1a; margin-top:6px;" id="qrisAmount">Rp0</p>
                     </div>
-                    <p style="font-size:12px; color:#999; margin-top:10px;">Simulasi QRIS — tekan tombol di bawah setelah pembayaran selesai dipindai pelanggan.</p>
+                    <p style="font-size:12px; color:#999; margin-top:10px;">Tekan tombol di bawah setelah pembayaran dikonfirmasi diterima.</p>
                 </div>
 
                 <div class="modal-actions">
@@ -3787,6 +3805,77 @@
             document.getElementById('panelQris').style.display = tab === 'qris' ? 'block' : 'none';
             document.getElementById('paymentConfirmBtn').textContent = tab === 'tunai' ? 'Konfirmasi Pembayaran' : 'Sudah Dibayar (QRIS)';
             hidePaymentError();
+
+            if (tab === 'qris') {
+                const total = parseIDR(document.getElementById('paymentTotalDisplay').textContent);
+                renderQrisCode(total);
+            }
+        }
+
+        // ===== QRIS Dinamis (nominal otomatis terisi sesuai total) =====
+        // Payload QRIS statis merchant. Nominal akan disisipkan secara dinamis
+        // ke dalam field 54 (Transaction Amount) lalu CRC dihitung ulang.
+        const QRIS_STATIC_PAYLOAD = "00020101021126610014COM.GO-JEK.WWW01189360091430010807460210G0010807460303UMI51440014ID.CO.QRIS.WWW0215ID10254393485700303UMI5204581253033605802ID5924KETIK ( KEDAI TIKUNGAN )6013JAKARTA TIMUR61051381062070703A0163040FB5";
+
+        function crc16ccitt(str) {
+            let crc = 0xFFFF;
+            for (let c = 0; c < str.length; c++) {
+                crc ^= (str.charCodeAt(c) << 8);
+                for (let i = 0; i < 8; i++) {
+                    if ((crc & 0x8000) !== 0) {
+                        crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+                    } else {
+                        crc = (crc << 1) & 0xFFFF;
+                    }
+                }
+            }
+            return crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+
+        function buildDynamicQrisPayload(amount) {
+            // Buang tag CRC lama ("63" + panjang "04" + 4 karakter nilai) di ujung payload
+            let payload = QRIS_STATIC_PAYLOAD.slice(0, -8);
+
+            // Ubah Point of Initiation Method dari statis (11) ke dinamis (12)
+            payload = payload.replace('010211', '010212');
+
+            // Sisipkan tag 54 (Transaction Amount) tepat setelah tag 53 (Transaction Currency)
+            const amountStr = String(Math.round(amount));
+            const tag54 = '54' + String(amountStr.length).padStart(2, '0') + amountStr;
+            const idx53 = payload.indexOf('5303360');
+            const insertAt = idx53 !== -1 ? idx53 + '5303360'.length : payload.length;
+            const newPayload = payload.slice(0, insertAt) + tag54 + payload.slice(insertAt);
+
+            // Hitung ulang CRC atas seluruh payload + tag "6304"
+            const toChecksum = newPayload + '6304';
+            const crc = crc16ccitt(toChecksum);
+            return toChecksum + crc;
+        }
+
+        let qrisCodeInstance = null;
+
+        function renderQrisCode(amount) {
+            const container = document.getElementById('qrisPattern');
+            document.getElementById('qrisAmount').textContent = formatIDR(amount);
+
+            if (!amount || amount <= 0) {
+                container.innerHTML = '<span style="font-size:13px; color:#999;">Total belum tersedia</span>';
+                return;
+            }
+
+            if (typeof QRCode === 'undefined') {
+                container.innerHTML = '<span style="font-size:13px; color:#999;">Gagal memuat QR</span>';
+                return;
+            }
+
+            const payload = buildDynamicQrisPayload(amount);
+            container.innerHTML = '';
+            qrisCodeInstance = new QRCode(container, {
+                text: payload,
+                width: 184,
+                height: 184,
+                correctLevel: QRCode.CorrectLevel.M
+            });
         }
 
         function renderCashQuickButtons(total) {
